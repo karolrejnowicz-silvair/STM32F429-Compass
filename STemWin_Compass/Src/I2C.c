@@ -1,12 +1,14 @@
 #include "I2C.h"
 #include "stm32f429i_discovery.h"
 
-#define I2C_TIMEOUT 5
+#define I2C_TIMEOUT 0x3000
 
 I2C_HandleTypeDef I2C_Handler;
 
 void I2C_Init(void)
 {
+	if(HAL_I2C_GetState(&I2C_Handler) == HAL_I2C_STATE_RESET)
+  {
 	I2C_Handler.Instance              = DISCOVERY_I2Cx;
 	I2C_Handler.Init.ClockSpeed       = BSP_I2C_SPEED;
 	I2C_Handler.Init.DutyCycle        = I2C_DUTYCYCLE_2;
@@ -18,6 +20,8 @@ void I2C_Init(void)
 	I2C_Handler.Init.NoStretchMode    = I2C_NOSTRETCH_DISABLED; 
 	
 	HAL_I2C_Init(&I2C_Handler);
+		
+	}
 }
 
 I2C_Status_T I2C_Write(uint8_t Address, uint8_t Register, uint8_t Value)

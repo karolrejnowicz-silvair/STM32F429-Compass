@@ -38,9 +38,18 @@ uint8_t GUI_Initialized = 0;
 TIM_HandleTypeDef TimHandle;
 uint32_t uwPrescalerValue = 0;
 
+/* UART handler declaration */
+UART_HandleTypeDef UartHandle;
+__IO ITStatus UartReady = RESET;
+
+/* Buffer used for transmission */
+uint8_t aTxBuffer[] = " Magnetometer !! \n ";
+
 /* Private function prototypes -----------------------------------------------*/
 static void BSP_Config(void);
 static void SystemClock_Config(void);
+static void Error_Handler(void);
+
 void BSP_Pointer_Update(void);
 void BSP_Background(void);
 
@@ -94,6 +103,33 @@ int main(void)
     }
   }
   
+	  /*##-1- Configure the UART peripheral ######################################*/
+  /* Put the USART peripheral in the Asynchronous mode (UART Mode) */
+  /* UART1 configured as follow:
+      - Word Length = 8 Bits
+      - Stop Bit = One Stop bit
+      - Parity = None
+      - BaudRate = 9600 baud
+      - Hardware flow control disabled (RTS and CTS signals) */
+	
+  UartHandle.Instance          = USARTx;
+  
+  UartHandle.Init.BaudRate     = 9600;
+  UartHandle.Init.WordLength   = UART_WORDLENGTH_8B;
+  UartHandle.Init.StopBits     = UART_STOPBITS_1;
+  UartHandle.Init.Parity       = UART_PARITY_NONE;
+  UartHandle.Init.HwFlowCtl    = UART_HWCONTROL_NONE;
+  UartHandle.Init.Mode         = UART_MODE_TX_RX;
+  UartHandle.Init.OverSampling = UART_OVERSAMPLING_16;
+    
+  if(HAL_UART_Init(&UartHandle) != HAL_OK)
+  {
+    Error_Handler();
+  }
+	HAL_UART_MspInit(&UartHandle);
+	
+	
+	
   /*##-2- Start the TIM Base generation in interrupt mode ####################*/
   /* Start Channel1 */
   if(HAL_TIM_Base_Start_IT(&TimHandle) != HAL_OK)
@@ -102,6 +138,13 @@ int main(void)
     {
     }
   }
+  //if(HAL_UART_Transmit(&UartHandle, (uint8_t*)aTxBuffer, TXBUFFERSIZE,5000)!= HAL_OK)
+	//if(HAL_UART_Transmit_IT(&UartHandle, (uint8_t*)aTxBuffer, TXBUFFERSIZE)!= HAL_OK)
+  //{
+  //  Error_Handler();
+  //}
+	UartSend((uint8_t*)aTxBuffer, TXBUFFERSIZE);
+	
   
   /***********************************************************/
   
@@ -228,6 +271,39 @@ void BSP_Pointer_Update(void)
   }
 }
 
+static void Error_Handler(void)
+{
+  /* Turn LED4 on */
+  BSP_LED_On(LED4);
+  while(1)
+  {
+  }
+}
+
+void HAL_UART_TxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+  /* Set transmission flag: transfer complete*/
+  UartReady = SET;
+
+  /* Turn LED3 on: Transfer in transmission process is correct */
+  BSP_LED_On(LED3);
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *UartHandle)
+{
+  /* Set transmission flag: transfer complete*/
+  UartReady = SET;
+
+  /* Turn LED3 on: Transfer in reception process is correct */
+  BSP_LED_On(LED3);
+}
+
+ void HAL_UART_ErrorCallback(UART_HandleTypeDef *UartHandle)
+{
+  /* Turn LED3 on: Transfer error in reception/transmission process */
+  BSP_LED_On(LED3); 
+}
+
 /**
   * @brief  System Clock Configuration
   *         The system Clock is configured as follow : 
@@ -283,6 +359,66 @@ static void SystemClock_Config(void)
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;  
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;  
   HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5);
+}
+
+void HAL_UART_MspInit(UART_HandleTypeDef* huart)
+{
+
+  GPIO_InitTypeDef GPIO_InitStruct;
+  if(huart->Instance==UART5)
+  {
+  /* USER CODE BEGIN UART5_MspInit 0 */
+		USARTx_TX_GPIO_CLK_ENABLE();
+		USARTx_RX_GPIO_CLK_ENABLE();
+  /* USER CODE END UART5_MspInit 0 */
+    /* Peripheral clock enable */
+		USARTx_TX_GPIO_CLK_ENABLE();
+		USARTx_RX_GPIO_CLK_ENABLE();
+		USARTx_CLK_ENABLE(); 
+    /**UART5 GPIO Configuration    
+    PC12     ------> UART5_TX
+    PD2     ------> UART5_RX 
+    */
+    GPIO_InitStruct.Pin = GPIO_PIN_12;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF8_UART5;
+    HAL_GPIO_Init(USARTx_TX_GPIO_PORT, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = GPIO_PIN_2;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_PULLUP;
+    GPIO_InitStruct.Speed = GPIO_SPEED_HIGH;
+    GPIO_InitStruct.Alternate = GPIO_AF8_UART5;
+    HAL_GPIO_Init(USARTx_RX_GPIO_PORT, &GPIO_InitStruct);
+
+  /* USER CODE BEGIN UART5_MspInit 1 */
+		HAL_NVIC_SetPriority(USARTx_IRQn, 0, 1);
+		HAL_NVIC_EnableIRQ(USARTx_IRQn);
+  /* USER CODE END UART5_MspInit 1 */
+  }
+
+}
+
+void USARTx_IRQHandler(void)
+{
+  HAL_UART_IRQHandler(& UartHandle);
+}
+
+void UartSend(uint8_t *pData, uint16_t size)
+{
+		if(HAL_UART_Transmit_IT(&UartHandle, pData, size)!= HAL_OK)
+  {
+    Error_Handler();
+  }
+	
+	  while (UartReady != SET)
+  {
+  }
+	
+	 /* Reset transmission flag */
+  UartReady = RESET;
 }
 
 #ifdef  USE_FULL_ASSERT

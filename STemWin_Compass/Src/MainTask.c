@@ -6,7 +6,6 @@
 #include "COMPASS.h"
 #include "MAGNETO.h" /* do okna kalibracji */
 #include "MaskBitmap.h"
-//#include "ITM_Retarget.c"
 
 static GUI_CONST_STORAGE unsigned short _accompass[] = {
   0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0FFF, 0x0DDD, 0x0AAA, 0x0888, 0x0888, 0x0766, 0x0766, 0x0888, 
@@ -704,7 +703,6 @@ static void CreateCompassWindow2(void)
 	//BUTTON_SetText(hBackBt, "Back");
   //BUTTON_SetFont(hBackBt, &GUI_Font8x15B_ASCII);
 	BUTTON_SetBitmap(hBackBt, BUTTON_BI_UNPRESSED, &bmimages);
-	
 	uint16_t i = 0;
 	double heading = 0;
 	
@@ -743,6 +741,7 @@ static void CreateCompassWindow2(void)
 		{
 			if(COMPASS_OK == COMPASS_GetHeading(&heading))
 			{
+				
 				COMPASS_Status_T statusCompass = COMPASS_OK;
 				GUI_ClearRect(110, 109, 140, 129);
 			
@@ -768,15 +767,14 @@ static void CreateCompassWindow2(void)
 					GUI_DispStringAt("W", 110, 109);
 				else if(heading >= 294 && heading <= 338)
 					GUI_DispStringAt("NW", 110, 109);
+			
 			}
 			else
 			{
 				BSP_LED_Toggle(LED3);
 			}
-			
-			GUI_DispDecAt(i, 100, 300, 3);
 		}
-		GUI_Delay(100);//
+		GUI_Delay(95);//
 	}
 }
 
@@ -1023,3 +1021,7 @@ ili9341_WriteReg(LCD_WDB);
 ili9341_WriteData(percent);
 moze zrobic zmiane jasnosci na suwak
 */
+
+
+
+

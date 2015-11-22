@@ -1147,6 +1147,44 @@ HAL_StatusTypeDef EEPROM_IO_IsDeviceReady(uint16_t DevAddress, uint32_t Trials)
 }
 #endif /* EE_M24LR64 */
 
+
+/**
+  * @brief  IOE Low Level Initialization.
+  * @param  None
+  * @retval None
+  */
+void MAG_Init(void) 
+{
+  I2Cx_Init();
+}
+
+/**
+  * @brief  IOE Writes single data operation.
+  * @param  Addr: I2C Address
+  * @param  Reg: Reg Address 
+  * @param  Value: Data to be written
+  * @retval None
+  */
+uint8_t MAG_Write(uint8_t Addr, uint8_t Reg, uint8_t Value)
+{
+	I2Cx_WriteData(Addr, Reg, Value);
+	return 1;
+}
+
+/**
+  * @brief  IOE Reads single data.
+  * @param  Addr: I2C Address
+  * @param  Reg: Reg Address 
+  * @retval The read data
+  */
+uint8_t MAG_Read(uint8_t Addr, uint8_t Reg, uint8_t *Value)
+{
+ return I2Cx_ReadBuffer(Addr, Reg, Value, 1);
+}
+
+
+
+
 /**
   * @}
   */ 

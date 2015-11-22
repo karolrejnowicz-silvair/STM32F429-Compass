@@ -324,6 +324,10 @@ void     BSP_LED_Toggle(Led_TypeDef Led);
 void     BSP_PB_Init(Button_TypeDef Button, ButtonMode_TypeDef ButtonMode);
 uint32_t BSP_PB_GetState(Button_TypeDef Button);
 
+void MAG_Init(void) ;
+uint8_t MAG_Write(uint8_t Addr, uint8_t Reg, uint8_t Value);
+uint8_t MAG_Read(uint8_t Addr, uint8_t Reg, uint8_t *Value);
+
 /**
   * @}
   */ 

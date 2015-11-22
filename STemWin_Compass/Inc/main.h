@@ -41,5 +41,38 @@
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 
+
+/* Definition for USARTx clock resources */
+#define USARTx                           UART5
+#define USARTx_CLK_ENABLE()              __HAL_RCC_UART5_CLK_ENABLE();
+#define USARTx_RX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOD_CLK_ENABLE()
+#define USARTx_TX_GPIO_CLK_ENABLE()      __HAL_RCC_GPIOC_CLK_ENABLE() 
+
+#define USARTx_FORCE_RESET()             __HAL_RCC_UART5_FORCE_RESET()
+#define USARTx_RELEASE_RESET()           __HAL_RCC_UART5_RELEASE_RESET()
+
+/* Definition for USARTx Pins */
+#define USARTx_TX_PIN                    GPIO_PIN_12
+#define USARTx_TX_GPIO_PORT              GPIOC  
+#define USARTx_TX_AF                     GPIO_AF8_UART5
+#define USARTx_RX_PIN                    GPIO_PIN_2
+#define USARTx_RX_GPIO_PORT              GPIOD 
+#define USARTx_RX_AF                     GPIO_AF8_UART5
+
+/* Definition for USARTx's NVIC */
+#define USARTx_IRQn                      UART5_IRQn
+#define USARTx_IRQHandler                UART5_IRQHandler
+
+/* Size of Transmission buffer */
+#define TXBUFFERSIZE                      (COUNTOF(aTxBuffer) - 1)
+/* Size of Reception buffer */
+#define RXBUFFERSIZE                      TXBUFFERSIZE
+
+/* Exported macro ------------------------------------------------------------*/
+#define COUNTOF(__BUFFER__)   (sizeof(__BUFFER__) / sizeof(*(__BUFFER__)))
+
+
+void UartSend(uint8_t *pData, uint16_t size);
+
 #endif /* __MAIN_H */
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
