@@ -5,12 +5,16 @@
 #include "GUI.h"
 #include "main.h"
 
+#define UART_DEBUG_MAG
+
 #define COMPASS_PI 3.14159
 
 #define COMPASS_DATA_READY 1
 
+#ifdef UART_DEBUG_MAG
 static uint16_t itoa(int16_t value, uint8_t *sp, int16_t radix);
 static void appendBlansk(uint8_t *string, uint8_t current_length, uint8_t desired_length);
+#endif
 
 void COMPASS_Init(void)
 {
@@ -27,17 +31,17 @@ COMPASS_Status_T COMPASS_GetHeading(double *heading)
 	COMPASS_Status_T ret_val = COMPASS_OK;
 	int16_t mag_reading[3];
 	MAG_Status_T statusMAG = MAG_OK;
+#ifdef UART_DEBUG_MAG
 	uint8_t buffer_x[] = {'x'};
 	uint8_t buffer_y[] = {'y'};
 	uint8_t buffer_z[] = {'z'};
 	uint8_t delimiter[] = {'\n'};
 	uint8_t buffer_datax[6], buffer_datay[6], buffer_dataz[6];
 	uint8_t size_x, size_y, size_z;
+#endif
 	
 	MAGNETO_StartForcedMeasure();
 	
-	//if(COMPASS_DATA_READY & MAGNETO_DataReady())
-	//{
 		statusMAG |= MAGNETO_ReadAxis(MAG_X_AXIS, &mag_reading[0]);
 		statusMAG |= MAGNETO_ReadAxis(MAG_Y_AXIS, &mag_reading[1]);
 		statusMAG |= MAGNETO_ReadAxis(MAG_Z_AXIS, &mag_reading[2]);
@@ -57,7 +61,7 @@ COMPASS_Status_T COMPASS_GetHeading(double *heading)
 		
 		if(*heading > 360)
 			*heading -= 360;
-		
+#ifdef UART_DEBUG_MAG
 		size_x = itoa(mag_reading[0], buffer_datax, 10);
 		size_y = itoa(mag_reading[1], buffer_datay, 10);
 		size_z = itoa(mag_reading[2], buffer_dataz, 10);
@@ -73,12 +77,11 @@ COMPASS_Status_T COMPASS_GetHeading(double *heading)
 		UartSend(buffer_z, 1);
 		UartSend(buffer_dataz, 6);
 		UartSend(delimiter, 1);
-		
+#endif
 		}
-	//}
 	return ret_val;
 }
-
+#ifdef UART_DEBUG_MAG
 static uint16_t itoa(int16_t value, uint8_t *sp, int16_t radix)
 {
 	uint8_t tmp[16];
@@ -129,3 +132,4 @@ static void appendBlansk(uint8_t *string, uint8_t current_length, uint8_t desire
 		}
 	}
 }
+#endif

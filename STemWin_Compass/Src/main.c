@@ -155,7 +155,6 @@ int main(void)
   /* Activate the use of memory device feature */
   WM_SetCreateFlags(WM_CF_MEMDEV);
   
-	GUI_SetBkColor(GUI_WHITE);
 	GUI_Exec();
   MainTask();
 

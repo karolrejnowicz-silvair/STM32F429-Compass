@@ -532,7 +532,7 @@ static uint8_t I2Cx_ReadData(uint8_t Addr, uint8_t Reg)
   {
     /* Re-Initialize the BUS */
     I2Cx_Error();
-  
+		HAL_I2C_Mem_Read(&I2cHandle, Addr, Reg, I2C_MEMADD_SIZE_8BIT, &value, 1, I2cxTimeout);
   }
   return value;
 }
